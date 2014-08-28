@@ -178,6 +178,7 @@ class Escape_NextGen_Gallery {
 		$path = $wpdb->get_row( "SELECT * FROM {$wpdb->prefix}ngg_gallery WHERE gid = ". intval( $gallery_id ), ARRAY_A  );
 		$images = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}ngg_pictures WHERE galleryid = ". intval( $gallery_id ) . " ORDER BY sortorder, pid ASC" );
 
+		$attachment_ids = array();
 		if ( ! $path || ! $images ) {
 			$this->warnings[] = sprintf( "Could not find images for nggallery %d", $gallery_id );
 			return;
@@ -220,7 +221,7 @@ class Escape_NextGen_Gallery {
 			$attachment->menu_order = $image->sortorder;
 
 			update_post_meta( $attachment->ID, '_wp_attachment_image_alt', $image->alttext );
-
+			$attachment_ids[] = $attachment->ID;
 			wp_update_post( $attachment );
 			$this->images_count++;
 			$this->infos[] = sprintf( "Added attachment for %d", $post->ID );
@@ -235,6 +236,7 @@ class Escape_NextGen_Gallery {
 		$attr = array();
 		if ( $existing_attachments_ids )
 			$attr['exclude'] = implode( ',', $existing_attachments_ids );
+		$attr['ids'] = implode( ',', $attachment_ids );
 
 		$gallery = '[gallery';
 		foreach ( $attr as $key => $value )
